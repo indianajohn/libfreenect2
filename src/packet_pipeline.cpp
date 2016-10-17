@@ -192,4 +192,33 @@ const short* DumpPacketPipeline::getDepthLookupTable(size_t* length) {
   return static_cast<DumpDepthPacketProcessor*>(getDepthPacketProcessor())->getLookupTable();
 }
 
+#if defined(LIBFREENECT2_WITH_CUDA_SUPPORT) || defined(LIBFREENECT2_WITH_OPENCL_SUPPORT)
+DumpRgbPacketPipeline::DumpRgbPacketPipeline(const int deviceId)
+{
+  RgbPacketProcessor *rgb = new DumpRgbPacketProcessor();
+#ifdef LIBFREENECT2_WITH_CUDA_SUPPORT
+  comp_->initialize(getDefaultRgbPacketProcessor(), new CudaDepthPacketProcessor(deviceId));
+  return;
+#endif // LIBFREENECT2_WITH_CUDA_SUPPORT
+#ifdef LIBFREENECT2_WITH_OPENCL_SUPPORT
+  comp_->initialize(rgb, new OpenCLDepthPacketProcessor(deviceId));
+  return;
+#endif // LIBFREENECT2_WITH_OPENCL_SUPPORT
+  comp_->initialize(rgb, new CpuDepthPacketProcessor());
+}
+#endif // defined(LIBFREENECT2_WITH_CUDA_SUPPORT) || defined(LIBFREENECT_WITH_OPENCL_SUPPORT)
+
+DumpRgbPacketPipeline::DumpRgbPacketPipeline(void *parent_opengl_context, bool debug)
+{
+  // Set RGB as dump, depth as the best in this order.
+  RgbPacketProcessor *rgb = new DumpRgbPacketProcessor();
+#ifdef LIBFREENECT2_WITH_OPENGL_SUPPORT
+  comp_->initialize(rgb, new OpenGLDepthPacketProcessor(parent_opengl_context, debug));
+  return;
+#endif // LIBFREENECT2_WITH_OPENGL_SUPPORT
+  comp_->initialize(rgb, new CpuDepthPacketProcessor());
+}
+
+DumpRgbPacketPipeline::~DumpRgbPacketPipeline() { }
+
 } /* namespace libfreenect2 */

@@ -82,6 +82,16 @@ protected:
    const short* getDepthLookupTable(size_t* length);
  };
 
+class LIBFREENECT2_API DumpRgbPacketPipeline : public PacketPipeline
+{
+public:
+  DumpRgbPacketPipeline(void *parent_opengl_context = 0, bool debug = false);
+#if defined(LIBFREENECT2_WITH_CUDA_SUPPORT) || defined(LIBFREENECT2_WITH_OPENCL_SUPPORT)
+  DumpRgbPacketPipeline(const int deviceId);
+#endif // defined(LIBFREENECT2_WITH_CUDA_SUPPORT) || defined(LIBFREENECT2_WITH_OPENCL_SUPPORT)
+  virtual ~DumpRgbPacketPipeline();
+};
+
 /** Pipeline with CPU depth processing. */
 class LIBFREENECT2_API CpuPacketPipeline : public PacketPipeline
 {
